@@ -15,6 +15,7 @@ pluginManagement {
 				includeGroupByRegex("com\\.github.*")
 			}
 		}
+		maven { url 'https://maven.pkg.jetbrains.space/public/p/compose/dev' }
 	}
 }
 dependencyResolutionManagement {
@@ -29,4 +30,5 @@ dependencyResolutionManagement {
 }
 
 include ':app'
+include ':desktop'
 rootProject.name = "Kotatsu"

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Kotatsu
+Comment=Manga reader for Linux
+Exec=kotatsu
+Icon=kotatsu
+Terminal=false
+Categories=Graphics;Viewer;
+Keywords=manga;comics;reader;
+StartupWMClass=Kotatsu

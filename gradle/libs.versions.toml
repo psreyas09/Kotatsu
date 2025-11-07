@@ -1,4 +1,6 @@
 [versions]
+compose = "1.7.5"
+composeDesktop = "1.7.1"
 acra = "5.13.1"
 activity = "1.11.0"
 adapterdelegates = "4.3.2"
@@ -120,6 +122,9 @@ androidx-window = { module = "androidx.window:window", version.ref = "window" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "gradle" }
+compose-desktop = { id = "org.jetbrains.compose", version.ref = "composeDesktop" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinx-serizliation = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

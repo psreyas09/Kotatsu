@@ -1,0 +1,92 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
+plugins {
+	alias libs.plugins.kotlin.jvm
+	alias libs.plugins.compose.desktop
+	alias libs.plugins.compose.compiler
+	alias libs.plugins.kotlinx.serizliation
+	alias libs.plugins.ksp
+}
+
+group = 'org.koitharu.kotatsu'
+version = '9.4.1'
+
+dependencies {
+	def parsersVersion = libs.versions.parsers.get()
+	if (System.properties.containsKey('parsersVersionOverride')) {
+		parsersVersion = System.getProperty('parsersVersionOverride')
+	}
+	//noinspection UseTomlInstead
+	implementation("com.github.KotatsuApp:kotatsu-parsers:$parsersVersion") {
+		exclude group: 'org.json', module: 'json'
+	}
+
+	implementation compose.desktop.currentOs
+	implementation compose.material3
+	implementation compose.materialIconsExtended
+	
+	implementation libs.kotlin.stdlib
+	implementation libs.kotlinx.coroutines.android
+	
+	implementation libs.okhttp
+	implementation libs.okhttp.tls
+	implementation libs.okhttp.dnsoverhttps
+	implementation libs.okio
+	implementation libs.kotlinx.serialization.json
+	
+	// SQLite for desktop
+	implementation 'org.xerial:sqlite-jdbc:3.47.1.0'
+	
+	// Coil for desktop (JVM variant only)
+	implementation 'io.coil-kt.coil3:coil:3.0.4'
+	implementation 'io.coil-kt.coil3:coil-network-okhttp:3.0.4'
+	
+	implementation libs.markwon
+	
+	implementation libs.conscrypt.android
+	
+	testImplementation libs.junit
+	testImplementation libs.json
+	testImplementation libs.kotlinx.coroutines.test
+}
+
+compose.desktop {
+	application {
+		mainClass = 'org.koitharu.kotatsu.desktop.MainKt'
+		
+		nativeDistributions {
+			targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
+			packageName = 'Kotatsu'
+			packageVersion = '9.4.1'
+			description = 'Manga reader for Linux Desktop'
+			copyright = '© 2025 Kotatsu. Licensed under GPLv3.'
+			vendor = 'Kotatsu'
+			
+			linux {
+				iconFile.set(project.file('src/main/resources/icon.png'))
+				packageName = 'kotatsu'
+				debMaintainer = 'kotatsu@example.com'
+				menuGroup = 'Graphics'
+				appCategory = 'Graphics'
+			}
+		}
+	}
+}
+
+kotlin {
+	jvmToolchain(21)
+}
+
+compileKotlin {
+	kotlinOptions {
+		jvmTarget = '21'
+		freeCompilerArgs += [
+			'-opt-in=kotlin.ExperimentalStdlibApi',
+			'-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi',
+			'-opt-in=kotlinx.coroutines.FlowPreview',
+			'-opt-in=kotlin.contracts.ExperimentalContracts',
+			'-opt-in=coil3.annotation.ExperimentalCoilApi',
+			'-opt-in=kotlinx.serialization.ExperimentalSerializationApi'
+		]
+	}
+}
