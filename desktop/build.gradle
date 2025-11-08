@@ -17,16 +17,19 @@ dependencies {
 		parsersVersion = System.getProperty('parsersVersionOverride')
 	}
 	//noinspection UseTomlInstead
-	implementation("com.github.KotatsuApp:kotatsu-parsers:$parsersVersion") {
-		exclude group: 'org.json', module: 'json'
-	}
+	implementation("com.github.KotatsuApp:kotatsu-parsers:$parsersVersion")
+	
+	// Add org.json for JVM (parsers library needs it)
+	implementation 'org.json:json:20240303'
 
 	implementation compose.desktop.currentOs
 	implementation compose.material3
 	implementation compose.materialIconsExtended
 	
 	implementation libs.kotlin.stdlib
-	implementation libs.kotlinx.coroutines.android
+	// Use JVM-compatible coroutines instead of Android-specific
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2'
 	
 	implementation libs.okhttp
 	implementation libs.okhttp.tls
@@ -37,8 +40,8 @@ dependencies {
 	// SQLite for desktop
 	implementation 'org.xerial:sqlite-jdbc:3.47.1.0'
 	
-	// Coil for desktop (JVM variant only)
-	implementation 'io.coil-kt.coil3:coil:3.0.4'
+	// Coil for Compose Desktop
+	implementation 'io.coil-kt.coil3:coil-compose:3.0.4'
 	implementation 'io.coil-kt.coil3:coil-network-okhttp:3.0.4'
 	
 	implementation libs.markwon

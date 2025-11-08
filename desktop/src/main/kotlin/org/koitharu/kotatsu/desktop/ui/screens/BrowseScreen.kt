@@ -18,21 +18,45 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koitharu.kotatsu.desktop.core.di.AppContainer
-import org.koitharu.kotatsu.desktop.core.manga.MangaInfo
-import org.koitharu.kotatsu.desktop.core.manga.MangaSourceInfo
+import org.koitharu.kotatsu.parsers.model.Manga
+import org.koitharu.kotatsu.parsers.model.MangaChapter
+import org.koitharu.kotatsu.parsers.model.MangaParserSource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseScreen(appContainer: AppContainer) {
-    var selectedSource by remember { mutableStateOf<MangaSourceInfo?>(null) }
+    var selectedSource by remember { mutableStateOf<MangaParserSource?>(null) }
+    var selectedManga by remember { mutableStateOf<Manga?>(null) }
+    var selectedChapter by remember { mutableStateOf<MangaChapter?>(null) }
     
-    if (selectedSource == null) {
-        SourceListScreen(appContainer) { source ->
-            selectedSource = source
+    when {
+        selectedChapter != null -> {
+            ReaderScreen(
+                appContainer = appContainer,
+                chapter = selectedChapter!!,
+                onBack = { selectedChapter = null }
+            )
         }
-    } else {
-        MangaListScreen(appContainer, selectedSource!!) {
-            selectedSource = null
+        selectedManga != null -> {
+            MangaDetailsScreen(
+                appContainer = appContainer,
+                manga = selectedManga!!,
+                onBack = { selectedManga = null },
+                onChapterClick = { chapter -> selectedChapter = chapter }
+            )
+        }
+        selectedSource != null -> {
+            MangaListScreen(
+                appContainer = appContainer,
+                source = selectedSource!!,
+                onBack = { selectedSource = null },
+                onMangaClick = { manga -> selectedManga = manga }
+            )
+        }
+        else -> {
+            SourceListScreen(appContainer) { source ->
+                selectedSource = source
+            }
         }
     }
 }
@@ -41,7 +65,7 @@ fun BrowseScreen(appContainer: AppContainer) {
 @Composable
 fun SourceListScreen(
     appContainer: AppContainer,
-    onSourceSelected: (MangaSourceInfo) -> Unit
+    onSourceSelected: (MangaParserSource) -> Unit
 ) {
     val sources = remember { appContainer.mangaRepository.getAvailableSources() }
     var searchQuery by remember { mutableStateOf("") }
@@ -50,7 +74,7 @@ fun SourceListScreen(
         if (searchQuery.isEmpty()) {
             sources
         } else {
-            sources.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            sources.filter { it.title.contains(searchQuery, ignoreCase = true) }
         }
     }
     
@@ -96,11 +120,11 @@ fun SourceListScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = source.name,
+                                text = source.title,
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Source: ${source.name}",
+                                text = source.locale?.toString()?.uppercase() ?: "ALL",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -121,10 +145,11 @@ fun SourceListScreen(
 @Composable
 fun MangaListScreen(
     appContainer: AppContainer,
-    source: MangaSourceInfo,
-    onBack: () -> Unit
+    source: MangaParserSource,
+    onBack: () -> Unit,
+    onMangaClick: (Manga) -> Unit
 ) {
-    var mangaList by remember { mutableStateOf<List<MangaInfo>>(emptyList()) }
+    var mangaList by remember { mutableStateOf<List<Manga>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -166,7 +191,7 @@ fun MangaListScreen(
             .padding(24.dp)
     ) {
         TopAppBar(
-            title = { Text(source.name) },
+            title = { Text(source.title) },
             navigationIcon = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, "Back")
@@ -255,7 +280,7 @@ fun MangaListScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(mangaList) { manga ->
-                        MangaCard(manga)
+                        MangaCard(manga, onClick = { onMangaClick(manga) })
                     }
                 }
             }
@@ -264,11 +289,12 @@ fun MangaListScreen(
 }
 
 @Composable
-fun MangaCard(manga: MangaInfo) {
+fun MangaCard(manga: Manga, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier
@@ -304,7 +330,7 @@ fun MangaCard(manga: MangaInfo) {
                 overflow = TextOverflow.Ellipsis
             )
             
-            if (manga.rating > 0) {
+            if (manga.rating >= 0) {
                 Text(
                     text = "⭐ ${String.format("%.1f", manga.rating)}",
                     style = MaterialTheme.typography.bodySmall,
