@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import org.koitharu.kotatsu.desktop.core.di.AppContainer
 import org.koitharu.kotatsu.desktop.ui.screens.*
 
@@ -19,17 +20,21 @@ enum class Screen(val title: String, val route: String) {
 
 @Composable
 fun AppNavigation(appContainer: AppContainer) {
-    var currentScreen by remember { mutableStateOf(Screen.HOME) }
+    var currentScreen by remember { mutableStateOf(Screen.BROWSE) }
     
     Row(modifier = Modifier.fillMaxSize()) {
         // Navigation Rail (Side menu)
-        NavigationRail {
+        NavigationRail(
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
             Screen.entries.forEach { screen ->
                 NavigationRailItem(
                     icon = { Icon(getScreenIcon(screen), contentDescription = screen.title) },
-                    label = { Text(screen.title) },
+                    label = { Text(screen.title, style = MaterialTheme.typography.labelSmall) },
                     selected = currentScreen == screen,
-                    onClick = { currentScreen = screen }
+                    onClick = { currentScreen = screen },
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
         }
@@ -40,11 +45,11 @@ fun AppNavigation(appContainer: AppContainer) {
             color = MaterialTheme.colorScheme.background
         ) {
             when (currentScreen) {
-                Screen.HOME -> HomeScreen(appContainer)
                 Screen.LIBRARY -> LibraryScreen(appContainer)
                 Screen.BROWSE -> BrowseScreen(appContainer)
                 Screen.HISTORY -> HistoryScreen(appContainer)
                 Screen.SETTINGS -> SettingsScreen(appContainer)
+                else -> LibraryScreen(appContainer)
             }
         }
     }
